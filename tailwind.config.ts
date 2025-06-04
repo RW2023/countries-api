@@ -1,6 +1,7 @@
-import type { Config } from 'tailwindcss'
+import type { Config } from 'tailwindcss';
 
 const config: Config = {
+  darkMode: 'class',
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -8,12 +9,15 @@ const config: Config = {
   ],
   theme: {
     extend: {
-    
+      colors: {
+        'color-old-rose': '#C08081',
+      },
     },
   },
   plugins: [require('daisyui')],
   daisyui: {
-    themes: true, 
+    themes: true,
   },
-}
-export default config
+};
+
+export default config;
