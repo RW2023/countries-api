@@ -20,7 +20,15 @@ export const dynamic = 'force-dynamic'; // enable runtime rendering
 export default async function CountryPage({ params }: { params: Promise<{ name: string }> }) {
     const { name } = await params;
     const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/countries`);
-    const allCountries: Country[] = await res.json();
+    let allCountries: Country[] = [];
+    try {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+            allCountries = data;
+        }
+    } catch (err) {
+        console.error('Error loading countries', err);
+    }
 
     const country = allCountries.find(
         (c) => c.name.toLowerCase() === decodeURIComponent(name).toLowerCase()
