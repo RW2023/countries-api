@@ -19,7 +19,9 @@ export const dynamic = 'force-dynamic'; // enable runtime rendering
 
 export default async function CountryPage({ params }: { params: Promise<{ name: string }> }) {
     const { name } = await params;
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const baseUrl =
+        process.env.NEXT_PUBLIC_SITE_URL ||
+        (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
     const res = await fetch(`${baseUrl}/api/countries`);
     let allCountries: Country[] = [];
     try {
