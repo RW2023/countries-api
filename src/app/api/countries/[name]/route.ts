@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
-  _req: NextRequest,
+  request: NextRequest,
   { params }: { params: { name: string } }
-) {
+): Promise<NextResponse> {
   try {
     const name = decodeURIComponent(params.name);
     const res = await fetch(
