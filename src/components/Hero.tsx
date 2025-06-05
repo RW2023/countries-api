@@ -5,7 +5,7 @@ import { Globe2 } from 'lucide-react';
 
 export default function HeroSection() {
     return (
-        <section className="min-h-[90vh] flex flex-col items-center justify-center px-6 py-20 text-center bg-base-100 text-base-content transition-colors duration-300">
+        <section className="min-h-[90vh] flex flex-col items-center justify-center px-6 py-20 text-center transition-colors duration-300 bg-base-100 text-base-content dark:bg-neutral dark:text-neutral-content">
             <div className="flex justify-center mb-4">
                 <Globe2 className="w-12 h-12 text-primary" />
             </div>
