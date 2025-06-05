@@ -1,0 +1,42 @@
+[
+  {
+    "name": "United States",
+    "flag": "https://flagcdn.com/us.svg",
+    "capital": "Washington D.C.",
+    "population": 331002651,
+    "region": "Americas",
+    "languages": {"eng": "English"}
+  },
+  {
+    "name": "Canada",
+    "flag": "https://flagcdn.com/ca.svg",
+    "capital": "Ottawa",
+    "population": 38005238,
+    "region": "Americas",
+    "languages": {"eng": "English", "fra": "French"}
+  },
+  {
+    "name": "Germany",
+    "flag": "https://flagcdn.com/de.svg",
+    "capital": "Berlin",
+    "population": 83240525,
+    "region": "Europe",
+    "languages": {"deu": "German"}
+  },
+  {
+    "name": "Japan",
+    "flag": "https://flagcdn.com/jp.svg",
+    "capital": "Tokyo",
+    "population": 125836021,
+    "region": "Asia",
+    "languages": {"jpn": "Japanese"}
+  },
+  {
+    "name": "Brazil",
+    "flag": "https://flagcdn.com/br.svg",
+    "capital": "Brasília",
+    "population": 212559417,
+    "region": "Americas",
+    "languages": {"por": "Portuguese"}
+  }
+]

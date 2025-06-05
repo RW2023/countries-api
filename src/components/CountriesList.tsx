@@ -19,8 +19,24 @@ export default function CountriesList() {
 
     useEffect(() => {
         fetch('/api/countries')
-            .then((res) => res.json())
-            .then((data) => setCountries(data));
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error('Request failed');
+                }
+                return res.json();
+            })
+            .then((data) => {
+                if (Array.isArray(data)) {
+                    setCountries(data);
+                } else {
+                    console.error('Failed to load countries', data);
+                    setCountries([]);
+                }
+            })
+            .catch((err) => {
+                console.error('Error fetching countries', err);
+                setCountries([]);
+            });
     }, []);
 
     const filtered = countries.filter((c) =>
