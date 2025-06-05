@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
-  _req: Request,
+  _req: NextRequest,
   { params }: { params: { name: string } }
 ) {
   try {

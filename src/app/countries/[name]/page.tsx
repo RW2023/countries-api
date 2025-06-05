@@ -19,10 +19,10 @@ type Country = {
 
 export const dynamic = 'force-dynamic'; // enable runtime rendering
 
-export default async function CountryPage({ params }: { params: Promise<{ name: string }> }) {
-    const { name } = await params;
+export default async function CountryPage({ params }: { params: { name: string } }) {
+    const { name } = params;
     const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SITE_URL}/api/countries/${encodeURIComponent(name)}`
+        `/api/countries/${encodeURIComponent(name)}`
     );
     if (!res.ok) return notFound();
     const country: Country = await res.json();
