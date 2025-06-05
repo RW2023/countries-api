@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { readFile } from 'fs/promises';
+import path from 'path';
 
 export async function GET() {
   try {
@@ -14,6 +16,17 @@ export async function GET() {
     }));
     return NextResponse.json(simplified);
   } catch (err) {
-    return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 });
+    // Fallback to local data when the remote API is unreachable
+    try {
+      const filePath = path.join(process.cwd(), 'src', 'data', 'countries.json');
+      const fileData = await readFile(filePath, 'utf-8');
+      const data = JSON.parse(fileData);
+      return NextResponse.json(data);
+    } catch (readErr) {
+      return NextResponse.json(
+        { error: 'Failed to load countries' },
+        { status: 500 }
+      );
+    }
   }
 }
