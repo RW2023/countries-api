@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 
 export async function GET(
-  _req: NextRequest,
+  _req: Request,
   { params }: { params: { name: string } }
 ) {
   try {
