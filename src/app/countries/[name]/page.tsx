@@ -17,11 +17,12 @@ type Country = {
 export const dynamic = 'force-dynamic'; // enable runtime rendering
 
 export default async function CountryPage({ params }: { params: { name: string } }) {
+    const { name } = await params;
     const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/countries`);
     const allCountries: Country[] = await res.json();
 
     const country = allCountries.find(
-        (c) => c.name.toLowerCase() === decodeURIComponent(params.name).toLowerCase()
+        (c) => c.name.toLowerCase() === decodeURIComponent(name).toLowerCase()
     );
 
     if (!country) return notFound();
