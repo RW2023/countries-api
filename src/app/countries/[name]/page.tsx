@@ -1,6 +1,7 @@
 // app/countries/[name]/page.tsx
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
+import type { PageProps } from 'next';
 
 type Country = {
     name: string;
@@ -16,12 +17,13 @@ type Country = {
 
 export const dynamic = 'force-dynamic'; // enable runtime rendering
 
-export default async function CountryPage({ params }: { params: { name: string } }) {
+export default async function CountryPage({ params }: PageProps<{ name: string }>) {
+    const { name } = await params;
     const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/countries`);
     const allCountries: Country[] = await res.json();
 
     const country = allCountries.find(
-        (c) => c.name.toLowerCase() === decodeURIComponent(params.name).toLowerCase()
+        (c) => c.name.toLowerCase() === decodeURIComponent(name).toLowerCase()
     );
 
     if (!country) return notFound();
