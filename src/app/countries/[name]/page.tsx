@@ -13,20 +13,19 @@ type Country = {
     subregion?: string;
     borders?: string[];
     area?: number;
+    currencies?: Record<string, { name: string; symbol: string }>;
+    timezones?: string[];
 };
 
 export const dynamic = 'force-dynamic'; // enable runtime rendering
 
-export default async function CountryPage({ params }: { params: Promise<{ name: string }> }) {
-    const { name } = await params;
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/countries`);
-    const allCountries: Country[] = await res.json();
-
-    const country = allCountries.find(
-        (c) => c.name.toLowerCase() === decodeURIComponent(name).toLowerCase()
+export default async function CountryPage({ params }: { params: { name: string } }) {
+    const { name } = params;
+    const res = await fetch(
+        `/api/countries/${encodeURIComponent(name)}`
     );
-
-    if (!country) return notFound();
+    if (!res.ok) return notFound();
+    const country: Country = await res.json();
 
     return (
         <main className="max-w-4xl mx-auto py-10 px-4 space-y-6">
@@ -50,6 +49,17 @@ export default async function CountryPage({ params }: { params: Promise<{ name: 
                     {country.area && <p><strong>Area:</strong> {country.area.toLocaleString()} km²</p>}
                     {country.borders?.length && (
                         <p><strong>Borders:</strong> {country.borders.join(', ')}</p>
+                    )}
+                    {country.currencies && (
+                        <p>
+                            <strong>Currencies:</strong>{' '}
+                            {Object.values(country.currencies)
+                                .map((c) => c.name)
+                                .join(', ')}
+                        </p>
+                    )}
+                    {country.timezones && (
+                        <p><strong>Timezones:</strong> {country.timezones.join(', ')}</p>
                     )}
                 </div>
             </div>
