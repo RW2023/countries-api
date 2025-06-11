@@ -16,16 +16,35 @@ type Country = {
 export default function CountriesList() {
     const [countries, setCountries] = useState<Country[]>([]);
     const [search, setSearch] = useState('');
+    const [error, setError] = useState(false);
 
     useEffect(() => {
         fetch('/api/countries')
-            .then((res) => res.json())
-            .then((data) => setCountries(data));
+            .then((res) => {
+                if (!res.ok) throw new Error('Failed to fetch');
+                return res.json();
+            })
+            .then((data: Country[]) => {
+                if (!Array.isArray(data)) throw new Error('Invalid data format');
+                setCountries(data);
+            })
+            .catch((err) => {
+                console.error('Fetch error:', err);
+                setError(true);
+            });
     }, []);
 
     const filtered = countries.filter((c) =>
         c.name.toLowerCase().includes(search.toLowerCase())
     );
+
+    if (error) {
+        return (
+            <div className="p-4 text-red-600 dark:text-red-400">
+                Failed to load countries. Please try again later.
+            </div>
+        );
+    }
 
     return (
         <section className="space-y-6 min-h-screen bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100 px-4 py-8 transition-colors duration-300">
