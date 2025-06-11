@@ -1,4 +1,16 @@
 ---
+name: "Country Explorer"
+description: "Creative Visualization of the Countries API"
+category: "Portfolio"
+author: "Ryan Wilson"
+authorUrl: "ryan-w.dev"
+tags: ["api", "portfolio", "Utility App"]
+lastUpdated: "2025-11-06"
+---
+
+# Project Title
+
+---
 name: "Next.js React Redux TypeScript Development Guide"
 description: "A comprehensive development guide for modern web applications using Next.js, React, Redux, TypeScript with best practices, conventions, and standards for scalable development"
 category: "Full-Stack Framework"
