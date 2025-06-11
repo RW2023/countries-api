@@ -1,7 +1,14 @@
+// next.config.js
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const withPWA = require('next-pwa')({
+  dest: 'public',               // Service worker output location
+  register: true,              // Auto-register service worker
+  skipWaiting: true,           // Activate new SW immediately
+  disable: process.env.NODE_ENV === 'development', // Only enable in prod
+});
+
+const nextConfig = withPWA({
   images: {
-    // ✅ Replaces deprecated "domains" option
     remotePatterns: [
       {
         protocol: 'https',
@@ -14,10 +21,9 @@ const nextConfig = {
     ],
   },
 
-  // 🟡 Allow build to proceed even with TS errors
   typescript: {
     ignoreBuildErrors: true,
   },
-};
+});
 
 module.exports = nextConfig;
