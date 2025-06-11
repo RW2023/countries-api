@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 type Country = {
   name: string;
+  code: string;
   flag: string;
   capital: string;
   population: number;
@@ -12,7 +13,7 @@ type Country = {
 export async function GET() {
   try {
     const res = await fetch(
-      'https://restcountries.com/v3.1/all?fields=name,flags,capital,population,region,languages',
+      'https://restcountries.com/v3.1/all?fields=name,cca3,flags,capital,population,region,languages',
       { cache: 'no-store' }
     );
 
@@ -26,9 +27,10 @@ export async function GET() {
 
     const countries: Country[] = data.map((country: any) => ({
       name: country.name?.common || 'Unknown',
+      code: country.cca3 || 'N/A',
       flag: country.flags?.svg || country.flags?.png || '',
       capital: country.capital?.[0] || 'N/A',
-      population: country.population || 0,
+      population: country.population ?? 0,
       region: country.region || 'Unknown',
       languages: country.languages || {},
     }));
@@ -40,6 +42,7 @@ export async function GET() {
     const fallback: Country[] = [
       {
         name: 'Canada',
+        code: 'CAN',
         flag: 'https://flagcdn.com/ca.svg',
         capital: 'Ottawa',
         population: 38000000,

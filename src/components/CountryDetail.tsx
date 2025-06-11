@@ -18,50 +18,60 @@ import {
 
 type Props = {
     country: Country;
-    /* Optional ordered list supplied by the page for better SSR. */
-    allCountries?: Pick<Country, "name">[];
+    /**
+     * Optional ordered list (name + code) supplied by the parent page
+     * so we can SSR the pagination bar.  Falls back to client fetch.
+     */
+    allCountries?: Pick<Country, "name" | "code">[];
 };
 
 export default function CountryDetail({ country, allCountries = [] }: Props) {
     const router = useRouter();
 
     /* ------------------------------------------------------------------ */
-    /* Build alphabetical list of country slugs for prev/next navigation. */
-    /* If not provided via props we lazily fetch only the names client-side*/
+    /* Alphabetical list of { name, code } objects for prev / next links. */
     /* ------------------------------------------------------------------ */
-    const [names, setNames] = useState<string[]>(
-        () => allCountries.map((c) => c.name.toLowerCase())
+    const [list, setList] = useState<{ name: string; code: string }[]>(() =>
+        allCountries
+            .map(({ name, code }) => ({ name, code }))
+            .sort((a, b) => a.name.localeCompare(b.name))
     );
 
+    // Lazy-fetch list if not provided by SSR
     useEffect(() => {
-        if (names.length) return; // already have
-        fetch("/api/countries?fields=name")
+        if (list.length) return; // already have
+        fetch("/api/countries?fields=name,code")
             .then((r) => (r.ok ? r.json() : []))
-            .then((arr: Pick<Country, "name">[]) =>
-                setNames(arr.map((c) => c.name.toLowerCase()))
+            .then(
+                (arr: { name: string; code: string }[]) =>
+                    setList(
+                        arr
+                            .map(({ name, code }) => ({ name, code }))
+                            .sort((a, b) => a.name.localeCompare(b.name))
+                    )
             )
             .catch(() => { });
-    }, [names.length]);
+    }, [list.length]);
 
-    const slug = country.name.toLowerCase();
-    const currentIndex = names.indexOf(slug);
-    const prevSlug = currentIndex > 0 ? names[currentIndex - 1] : undefined;
-    const nextSlug =
-        currentIndex !== -1 && currentIndex < names.length - 1
-            ? names[currentIndex + 1]
+    /* ---------------------- prev / next country codes ------------------ */
+    const currentIndex = list.findIndex((c) => c.code === country.code);
+    const prevCode = currentIndex > 0 ? list[currentIndex - 1]?.code : undefined;
+    const nextCode =
+        currentIndex !== -1 && currentIndex < list.length - 1
+            ? list[currentIndex + 1]?.code
             : undefined;
 
-    /* Keyboard arrows */
+    /* Keyboard arrows*/
     useEffect(() => {
         const handler = (e: KeyboardEvent) => {
-            if (e.key === "ArrowLeft" && prevSlug) router.push(`/countries/${prevSlug}`);
-            if (e.key === "ArrowRight" && nextSlug) router.push(`/countries/${nextSlug}`);
+            if (e.key === "ArrowLeft" && prevCode) router.push(`/countries/${prevCode}`);
+            if (e.key === "ArrowRight" && nextCode) router.push(`/countries/${nextCode}`);
         };
         window.addEventListener("keydown", handler);
         return () => window.removeEventListener("keydown", handler);
-    }, [prevSlug, nextSlug, router]);
+    }, [prevCode, nextCode, router]);
 
-    /* -------------------------------- Stats array -------------------------------- */
+    /* ----------------------------- Stats ------------------------------ */
     const stats = useMemo(() => {
         return (
             [
@@ -97,7 +107,7 @@ export default function CountryDetail({ country, allCountries = [] }: Props) {
         );
     }, [country]);
 
-    /* -------------------------------- Render -------------------------------- */
+    /* ----------------------------- Render ----------------------------- */
     return (
         <main className="max-w-4xl mx-auto py-16 px-4 space-y-10">
             {/* navigation bar */}
@@ -106,19 +116,13 @@ export default function CountryDetail({ country, allCountries = [] }: Props) {
                     <ArrowLeft size={16} className="mr-1" /> Back
                 </Link>
                 <div className="flex gap-2">
-                    {prevSlug && (
-                        <Link
-                            href={`/countries/${prevSlug}`}
-                            className="btn btn-sm btn-neutral"
-                        >
+                    {prevCode && (
+                        <Link href={`/countries/${prevCode}`} className="btn btn-sm btn-neutral">
                             <ArrowLeft size={16} />
                         </Link>
                     )}
-                    {nextSlug && (
-                        <Link
-                            href={`/countries/${nextSlug}`}
-                            className="btn btn-sm btn-neutral"
-                        >
+                    {nextCode && (
+                        <Link href={`/countries/${nextCode}`} className="btn btn-sm btn-neutral">
                             <ArrowRight size={16} />
                         </Link>
                     )}

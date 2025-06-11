@@ -7,7 +7,10 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 
 interface Country {
+    /** Common name (e.g. “Canada”) */
     name: string;
+    /** 3-letter alpha code used for routing (e.g. “CAN”) */
+    code: string;
     flag: string;
     capital: string;
     population: number;
@@ -24,7 +27,7 @@ export default function CountriesList() {
     const [page, setPage] = useState(1);
     const [error, setError] = useState(false);
 
-    /*── Fetch ‐──────────────────────────────────────────────*/
+    /*── Fetch all countries ──────────────────────────────*/
     useEffect(() => {
         setLoading(true);
         fetch("/api/countries")
@@ -39,7 +42,7 @@ export default function CountriesList() {
             });
     }, []);
 
-    /*── Derived lists ‐──────────────────────────────────────*/
+    /*── Derived lists ────────────────────────────────────*/
     const filtered = countries.filter((c) =>
         c.name.toLowerCase().includes(search.toLowerCase())
     );
@@ -47,7 +50,7 @@ export default function CountriesList() {
     const start = (page - 1) * PER_PAGE;
     const pageSlice = filtered.slice(start, start + PER_PAGE);
 
-    /*── Error fallback ‐─────────────────────────────────────*/
+    /*── Error fallback ───────────────────────────────────*/
     if (error) {
         return (
             <div className="p-4 text-error text-center font-medium">
@@ -58,7 +61,7 @@ export default function CountriesList() {
 
     return (
         <section className="space-y-8 min-h-screen">
-            {/* search */}
+            {/* ── search box ─────────────────────────────────── */}
             <input
                 type="text"
                 placeholder="Search for a country…"
@@ -70,7 +73,7 @@ export default function CountriesList() {
                 }}
             />
 
-            {/* grid */}
+            {/* ── grid ───────────────────────────────────────── */}
             {loading ? (
                 <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {Array.from({ length: 8 }).map((_, i) => (
@@ -96,14 +99,12 @@ export default function CountriesList() {
                     >
                         {pageSlice.map((country) => (
                             <motion.li
-                                key={country.name}
+                                key={country.code}
                                 whileHover={{ y: -6 }}
                                 className="rounded-xl bg-gray-100 dark:bg-gray-800 border border-[var(--border)] shadow-md"
                             >
                                 <Link
-                                    href={`/countries/${encodeURIComponent(
-                                        country.name.toLowerCase()
-                                    )}`}
+                                    href={`/countries/${country.code}`}
                                     className="block p-5 space-y-4 text-center"
                                 >
                                     <Image
@@ -115,7 +116,8 @@ export default function CountriesList() {
                                     />
                                     <h2 className="text-lg font-semibold">{country.name}</h2>
                                     <p className="text-sm opacity-70">
-                                        {country.region} &middot; {country.population.toLocaleString()}
+                                        {country.region} &middot;{" "}
+                                        {country.population.toLocaleString()}
                                     </p>
                                 </Link>
                             </motion.li>
@@ -124,14 +126,15 @@ export default function CountriesList() {
                 </AnimatePresence>
             )}
 
-            {/* pagination */}
+            {/* ── pagination ─────────────────────────────────── */}
             {totalPages > 1 && (
                 <div className="flex justify-center gap-2 mt-6 flex-wrap">
                     {Array.from({ length: totalPages }).map((_, i) => (
                         <button
                             key={i + 1}
                             onClick={() => setPage(i + 1)}
-                            className={`btn btn-sm ${i + 1 === page ? "btn-primary" : "btn-outline"}`}
+                            className={`btn btn-sm ${i + 1 === page ? "btn-primary" : "btn-outline"
+                                }`}
                         >
                             {i + 1}
                         </button>
