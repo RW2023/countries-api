@@ -15,9 +15,10 @@ type Country = {
 
 export const dynamic = 'force-dynamic';
 
-export default async function CountryPage({ params }: { params: { name: string } }) {
+export default async function CountryPage({ params }: Promise<{ params: { name: string } }>) {
     try {
-        // ✅ Use localhost for development, .env for production
+        const { name } = await params;
+
         const baseUrl =
             process.env.NODE_ENV === 'development'
                 ? 'http://localhost:3000'
@@ -31,10 +32,8 @@ export default async function CountryPage({ params }: { params: { name: string }
         const data = await res.json();
         if (!Array.isArray(data)) throw new Error('Invalid API shape');
 
-        const allCountries: Country[] = data;
-
-        const country = allCountries.find(
-            (c) => c.name.toLowerCase() === decodeURIComponent(params.name).toLowerCase()
+        const country = data.find(
+            (c) => c.name.toLowerCase() === decodeURIComponent(name).toLowerCase()
         );
 
         if (!country) return notFound();
