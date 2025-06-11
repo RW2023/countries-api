@@ -27,7 +27,7 @@ export default function Navbar() {
             aria-label="Main navigation"
         >
             <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-20">
-                <Link href="/" className="flex items-center gap-2">
+                <Link href="/countries" className="flex items-center gap-2">
                     <Image
                         src="/logo.png"
                         alt="Site Logo"
