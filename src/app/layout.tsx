@@ -9,6 +9,8 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 export const metadata: Metadata = {
   title: 'Countries Explorer',
   description: 'Search and explore countries using the REST Countries API',
+  manifest: '/site.webmanifest',
+  themeColor: '#1e3a8a',
 };
 
 export default function RootLayout({
