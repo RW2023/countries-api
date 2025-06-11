@@ -33,7 +33,7 @@ export default function Navbar() {
                         alt="Site Logo"
                         width={40}
                         height={40}
-                        className="h-10 w-10 object-contain"
+                        className="h-10 w-10 object-contain rounded-full"
                     />
                     <span className="font-bold text-xl">Countries Explorer</span>
                 </Link>
