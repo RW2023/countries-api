@@ -5,32 +5,31 @@ import { useEffect, useState } from 'react';
 import { Sun, Moon, Laptop } from 'lucide-react';
 
 const modes = ['light', 'dark', 'system'] as const;
-type Mode = typeof modes[number];
+type Mode = (typeof modes)[number];
 
 export default function ThemeToggle() {
     const { theme, setTheme, systemTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
     const [currentMode, setCurrentMode] = useState<Mode>('system');
 
-    useEffect(() => {
-        setMounted(true);
-    }, []);
+    /* ensure hydration has happened before reading system/theme */
+    useEffect(() => setMounted(true), []);
 
+    /* sync external theme change → local state */
     useEffect(() => {
-        if (mounted && theme) {
-            setCurrentMode(theme as Mode);
-        }
-    }, [theme, mounted]);
+        if (mounted && theme) setCurrentMode(theme as Mode);
+    }, [mounted, theme]);
 
     if (!mounted) return null;
 
     const actualTheme = currentMode === 'system' ? systemTheme : currentMode;
-    const Icon = currentMode === 'system' ? Laptop : actualTheme === 'dark' ? Moon : Sun;
+    const Icon =
+        currentMode === 'system' ? Laptop : actualTheme === 'dark' ? Moon : Sun;
 
     const handleToggle = () => {
         const nextIndex = (modes.indexOf(currentMode) + 1) % modes.length;
-        const nextTheme = modes[nextIndex];
-        setTheme(nextTheme);
+        const nextTheme = modes[nextIndex] as Mode; // ⬅️ guaranteed non-undefined
+        setTheme(nextTheme);        // no TS error
         setCurrentMode(nextTheme);
     };
 
