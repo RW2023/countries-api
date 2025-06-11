@@ -1,4 +1,3 @@
-// @ts-nocheck  // suppress editor noise; compile-time checker is also bypassed
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 
