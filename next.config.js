@@ -1,12 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Allow external flag images
   images: {
-    domains: ['flagcdn.com', 'upload.wikimedia.org'],
+    // ✅ Replaces deprecated "domains" option
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'flagcdn.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'upload.wikimedia.org',
+      },
+    ],
   },
 
-  // ⚠️  Skip TypeScript errors during production builds
-  //     (local `next dev` still shows them in your editor)
+  // 🟡 Allow build to proceed even with TS errors
   typescript: {
     ignoreBuildErrors: true,
   },
