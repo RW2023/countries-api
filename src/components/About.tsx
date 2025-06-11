@@ -1,6 +1,6 @@
 export default function About() {
     return (
-        <section className="max-w-3xl mx-auto text-center py-16 px-4">
+        <section className="max-w-3xl mx-auto text-center py-16 px-4 min-h-screen">
             <h1 className="text-4xl font-bold mb-4 text-[hsl(var(--foreground))]">
                 About This Project
             </h1>
