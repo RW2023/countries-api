@@ -22,15 +22,6 @@ export default async function Page({
             <CountryDetail country={country} />
 
             {/* Deep-dive call-to-action */}
-            <div className="flex justify-center mt-8 mb-8">
-                <Link
-                    href={`/countries/${country.code}/deep`}
-                    className="btn btn-outline"
-                >
-                    View full deep-dive →
-                </Link>
-            </div>
-
         </>
     );
 }

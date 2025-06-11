@@ -1,4 +1,3 @@
-// CountryDetail.tsx – navigation fixed + reliable map embed
 "use client";
 
 import Image from "next/image";
@@ -16,52 +15,42 @@ import {
     Languages,
 } from "lucide-react";
 
-type Props = {
+/**
+ * CountryDetail – summary view with navigation + map preview.
+ * Now aligned with deep-dive button spacing & style (mt-8 mb-4).
+ */
+export default function CountryDetail({
+    country,
+    allCountries = [],
+}: {
     country: Country;
-    /**
-     * Optional ordered list (name + code) supplied by the parent page
-     * so we can SSR the pagination bar.  Falls back to client fetch.
-     */
     allCountries?: Pick<Country, "name" | "code">[];
-};
-
-export default function CountryDetail({ country, allCountries = [] }: Props) {
+}) {
     const router = useRouter();
 
-    /* ------------------------------------------------------------------ */
-    /* Alphabetical list of { name, code } objects for prev / next links. */
-    /* ------------------------------------------------------------------ */
+    /* -------------------------------- list for prev/next ------------------------------- */
     const [list, setList] = useState<{ name: string; code: string }[]>(() =>
         allCountries
             .map(({ name, code }) => ({ name, code }))
             .sort((a, b) => a.name.localeCompare(b.name))
     );
 
-    // Lazy-fetch list if not provided by SSR
+    // Fetch list client-side if not provided
     useEffect(() => {
-        if (list.length) return; // already have
+        if (list.length) return;
         fetch("/api/countries?fields=name,code")
             .then((r) => (r.ok ? r.json() : []))
-            .then(
-                (arr: { name: string; code: string }[]) =>
-                    setList(
-                        arr
-                            .map(({ name, code }) => ({ name, code }))
-                            .sort((a, b) => a.name.localeCompare(b.name))
-                    )
+            .then((arr: { name: string; code: string }[]) =>
+                setList(arr.sort((a, b) => a.name.localeCompare(b.name)))
             )
-            .catch(() => { });
+            .catch(() => {});
     }, [list.length]);
 
-    /* ---------------------- prev / next country codes ------------------ */
     const currentIndex = list.findIndex((c) => c.code === country.code);
     const prevCode = currentIndex > 0 ? list[currentIndex - 1]?.code : undefined;
-    const nextCode =
-        currentIndex !== -1 && currentIndex < list.length - 1
-            ? list[currentIndex + 1]?.code
-            : undefined;
+    const nextCode = currentIndex !== -1 && currentIndex < list.length - 1 ? list[currentIndex + 1]?.code : undefined;
 
-    /* Keyboard arrows*/
+    /* ------------------------------- keyboard nav -------------------------------------- */
     useEffect(() => {
         const handler = (e: KeyboardEvent) => {
             if (e.key === "ArrowLeft" && prevCode) router.push(`/countries/${prevCode}`);
@@ -71,7 +60,7 @@ export default function CountryDetail({ country, allCountries = [] }: Props) {
         return () => window.removeEventListener("keydown", handler);
     }, [prevCode, nextCode, router]);
 
-    /* ----------------------------- Stats ------------------------------ */
+    /* ------------------------------------- stats --------------------------------------- */
     const stats = useMemo(() => {
         return (
             [
@@ -98,31 +87,31 @@ export default function CountryDetail({ country, allCountries = [] }: Props) {
                     icon: Globe2,
                 },
                 Array.isArray(country.borders) &&
-                country.borders.length > 0 && {
-                    label: "Borders",
-                    value: country.borders.join(", "),
-                    icon: Globe2,
-                },
+                    country.borders.length > 0 && {
+                        label: "Borders",
+                        value: country.borders.join(", "),
+                        icon: Globe2,
+                    },
             ].filter(Boolean) as { label: string; value: string; icon: React.ElementType }[]
         );
     }, [country]);
 
-    /* ----------------------------- Render ----------------------------- */
+    /* ----------------------------------- render ---------------------------------------- */
     return (
-        <main className="max-w-4xl mx-auto py-16 px-4 space-y-10">
-            {/* navigation bar */}
+        <main className="max-w-4xl mx-auto py-16 pb-24 px-4 space-y-10 text-[var(--foreground)]">
+            {/* nav bar */}
             <div className="flex justify-between items-center">
-                <Link href="/countries" className="btn btn-sm btn-outline">
-                    <ArrowLeft size={16} className="mr-1" /> Back
+                <Link href="/countries" className="inline-flex items-center gap-2 border border-[var(--foreground)] px-3 py-1.5 rounded text-sm hover:bg-[var(--foreground)] hover:text-[var(--background)] transition">
+                    <ArrowLeft size={16} /> Back
                 </Link>
                 <div className="flex gap-2">
                     {prevCode && (
-                        <Link href={`/countries/${prevCode}`} className="btn btn-sm btn-neutral">
+                        <Link href={`/countries/${prevCode}`} className="inline-flex items-center border border-[var(--foreground)] p-1.5 rounded hover:bg-[var(--foreground)] hover:text-[var(--background)] transition">
                             <ArrowLeft size={16} />
                         </Link>
                     )}
                     {nextCode && (
-                        <Link href={`/countries/${nextCode}`} className="btn btn-sm btn-neutral">
+                        <Link href={`/countries/${nextCode}`} className="inline-flex items-center border border-[var(--foreground)] p-1.5 rounded hover:bg-[var(--foreground)] hover:text-[var(--background)] transition">
                             <ArrowRight size={16} />
                         </Link>
                     )}
@@ -132,23 +121,22 @@ export default function CountryDetail({ country, allCountries = [] }: Props) {
             {/* title */}
             <div className="text-center space-y-4">
                 <h1 className="text-5xl font-extrabold">{country.name}</h1>
-                <div className="h-1 w-32 mx-auto bg-gradient-to-r from-primary to-secondary rounded-full" />
+                <div className="h-1 w-32 mx-auto bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] rounded-full" />
             </div>
 
-            {/* flag + facts */}
+            {/* flag + stats */}
             <motion.div
                 className="flex flex-col sm:flex-row items-center gap-10"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.4 }}
             >
-                {/* flag */}
                 <motion.div
                     initial={{ x: -40, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ duration: 0.5 }}
                     whileHover={{ scale: 1.05, rotate: 1 }}
-                    className="rounded-xl border border-[var(--border)] shadow-lg overflow-hidden"
+                    className="rounded-xl border border-[var(--foreground)]/20 shadow overflow-hidden"
                 >
                     <Image
                         src={country.flag}
@@ -160,7 +148,6 @@ export default function CountryDetail({ country, allCountries = [] }: Props) {
                     />
                 </motion.div>
 
-                {/* stats */}
                 <motion.ul
                     className="space-y-3 text-lg"
                     initial={{ x: 40, opacity: 0 }}
@@ -169,11 +156,7 @@ export default function CountryDetail({ country, allCountries = [] }: Props) {
                 >
                     {stats.map(({ label, value, icon: Icon }) => (
                         <li key={label} className="flex items-start gap-3">
-                            <Icon
-                                size={20}
-                                className="mt-[3px] text-primary shrink-0"
-                                aria-hidden
-                            />
+                            <Icon size={20} className="mt-[3px] text-[var(--primary)] shrink-0" aria-hidden />
                             <span>
                                 <strong>{label}:</strong> {value}
                             </span>
@@ -183,15 +166,23 @@ export default function CountryDetail({ country, allCountries = [] }: Props) {
             </motion.div>
 
             {/* Map preview */}
-            <div className="rounded-xl overflow-hidden border border-[var(--border)]">
+            <div className="rounded-xl overflow-hidden border border-[var(--foreground)]/20">
                 <iframe
                     title={`${country.name} map`}
                     className="w-full h-64"
-                    src={`https://maps.google.com/maps?q=${encodeURIComponent(
-                        country.name
-                    )}&t=&z=4&ie=UTF8&iwloc=&output=embed`}
+                    src={`https://maps.google.com/maps?q=${encodeURIComponent(country.name)}&t=&z=4&ie=UTF8&iwloc=&output=embed`}
                     loading="lazy"
                 />
+            </div>
+
+            {/* deep-dive button */}
+            <div className="flex justify-center mt-8 mb-4">
+                <Link
+                    href={`/countries/${country.code}/deep`}
+                    className="inline-flex items-center gap-2 border border-[var(--foreground)] px-4 py-2 rounded-full text-sm font-medium hover:bg-[var(--foreground)] hover:text-[var(--background)] transition"
+                >
+                    View full deep-dive →
+                </Link>
             </div>
         </main>
     );
