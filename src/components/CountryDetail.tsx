@@ -2,41 +2,101 @@
 
 import Image from 'next/image';
 import { Country } from '@/lib/countries';
+import { motion } from 'framer-motion';
+import { MapPin, Globe2, Users, Languages } from 'lucide-react';
 
 type Props = { country: Country };
 
 export default function CountryDetail({ country }: Props) {
-    const showBorders = Array.isArray(country.borders) && country.borders.length > 0;
+    const stats = [
+        { label: 'Capital', value: country.capital, icon: MapPin },
+        { label: 'Region', value: country.region, icon: Globe2 },
+        {
+            label: 'Population',
+            value: country.population.toLocaleString(),
+            icon: Users,
+        },
+        country.languages && {
+            label: 'Languages',
+            value: Object.values(country.languages).join(', '),
+            icon: Languages,
+        },
+        country.subregion && {
+            label: 'Sub-region',
+            value: country.subregion,
+            icon: Globe2,
+        },
+        country.area && {
+            label: 'Area',
+            value: `${country.area.toLocaleString()} km²`,
+            icon: Globe2,
+        },
+        Array.isArray(country.borders) &&
+        country.borders.length > 0 && {
+            label: 'Borders',
+            value: country.borders.join(', '),
+            icon: Globe2,
+        },
+    ].filter(Boolean) as {
+        label: string;
+        value: string;
+        icon: React.ElementType;
+    }[];
 
     return (
-        <main className="max-w-4xl mx-auto py-10 px-4 space-y-8">
-            <h1 className="text-4xl font-bold text-center">{country.name}</h1>
-
-            <div className="flex flex-col sm:flex-row items-center gap-8">
-                <Image
-                    src={country.flag}
-                    alt={`${country.name} flag`}
-                    width={280}
-                    height={180}
-                    className="rounded-xl border border-[var(--border)] shadow"
-                />
-
-                <div className="space-y-2 text-[var(--foreground)]">
-                    <p><strong>Capital:</strong> {country.capital}</p>
-                    <p><strong>Region:</strong> {country.region}</p>
-                    <p><strong>Population:</strong> {country.population.toLocaleString()}</p>
-
-                    {country.languages && (
-                        <p><strong>Languages:</strong> {Object.values(country.languages).join(', ')}</p>
-                    )}
-                    {country.subregion && <p><strong>Subregion:</strong> {country.subregion}</p>}
-                    {country.area && <p><strong>Area:</strong> {country.area.toLocaleString()} km²</p>}
-
-                    {showBorders && (
-                        <p><strong>Borders:</strong> {country.borders!.join(', ')}</p>
-                    )}
-                </div>
+        <main className="max-w-4xl mx-auto py-16 px-4 space-y-10">
+            {/* title + accent bar */}
+            <div className="text-center space-y-4">
+                <h1 className="text-5xl font-extrabold">{country.name}</h1>
+                <div className="h-1 w-32 mx-auto bg-gradient-to-r from-primary to-secondary rounded-full" />
             </div>
+
+            {/* flag + facts */}
+            <motion.div
+                className="flex flex-col sm:flex-row items-center gap-10"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4 }}
+            >
+                {/* flag */}
+                <motion.div
+                    initial={{ x: -40, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                    whileHover={{ scale: 1.05, rotate: 1 }}
+                    className="rounded-xl border border-[var(--border)] shadow-lg overflow-hidden"
+                >
+                    <Image
+                        src={country.flag}
+                        alt={`${country.name} flag`}
+                        width={340}
+                        height={220}
+                        className="w-[340px] h-[220px] object-cover"
+                        priority
+                    />
+                </motion.div>
+
+                {/* fact list */}
+                <motion.ul
+                    className="space-y-3 text-lg"
+                    initial={{ x: 40, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    {stats.map(({ label, value, icon: Icon }) => (
+                        <li key={label} className="flex items-start gap-3">
+                            <Icon
+                                size={20}
+                                className="mt-[3px] text-primary shrink-0"
+                                aria-hidden
+                            />
+                            <span>
+                                <strong>{label}:</strong> {value}
+                            </span>
+                        </li>
+                    ))}
+                </motion.ul>
+            </motion.div>
         </main>
     );
 }

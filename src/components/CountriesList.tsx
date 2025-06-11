@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 
 type Country = {
     name: string;
@@ -18,15 +19,11 @@ export default function CountriesList() {
     const [search, setSearch] = useState('');
     const [error, setError] = useState(false);
 
-    /* fetch once */
     useEffect(() => {
         fetch('/api/countries')
             .then((r) => (r.ok ? r.json() : Promise.reject('fetch failed')))
             .then((data: Country[]) => setCountries(Array.isArray(data) ? data : []))
-            .catch((e) => {
-                console.error(e);
-                setError(true);
-            });
+            .catch(() => setError(true));
     }, []);
 
     const filtered = countries.filter((c) =>
@@ -42,8 +39,7 @@ export default function CountriesList() {
     }
 
     return (
-        <section className="space-y-6 min-h-screen transition-colors">
-            {/* search */}
+        <section className="space-y-8 min-h-screen">
             <input
                 type="text"
                 placeholder="Search for a country…"
@@ -52,37 +48,33 @@ export default function CountriesList() {
                 onChange={(e) => setSearch(e.target.value)}
             />
 
-            {/* cards */}
-            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 {filtered.map((country) => (
-                    <li
+                    <motion.li
                         key={country.name}
-                        className="rounded-xl bg-gray-100 dark:bg-gray-800 border border-[var(--border)] shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
+                        whileHover={{ y: -6 }}
+                        className="rounded-xl bg-gray-100 dark:bg-gray-800 border border-[var(--border)] shadow-md"
                     >
-                        <Link href={`/countries/${encodeURIComponent(country.name.toLowerCase())}`}>
-                            <div className="flex flex-col items-center gap-4 text-center p-4 cursor-pointer">
-                                <Image
-                                    src={country.flag}
-                                    alt={country.name}
-                                    width={80}
-                                    height={56}
-                                    className="w-20 h-14 object-cover rounded border border-[var(--border)]"
-                                />
-                                <h2 className="text-lg font-semibold">{country.name}</h2>
-
-                                <div className="text-sm text-[var(--muted)] space-y-1">
-                                    <p>Capital: {country.capital}</p>
-                                    <p>Region: {country.region}</p>
-                                    <p>Pop: {country.population.toLocaleString()}</p>
-                                    {country.languages && (
-                                        <p className="text-xs">
-                                            Languages: {Object.values(country.languages).join(', ')}
-                                        </p>
-                                    )}
-                                </div>
-                            </div>
+                        <Link
+                            href={`/countries/${encodeURIComponent(
+                                country.name.toLowerCase()
+                            )}`}
+                            className="block p-5 space-y-4 text-center"
+                        >
+                            <Image
+                                src={country.flag}
+                                alt={country.name}
+                                width={100}
+                                height={68}
+                                className="w-24 h-16 object-cover mx-auto rounded border border-[var(--border)]"
+                            />
+                            <h2 className="text-lg font-semibold">{country.name}</h2>
+                            <p className="text-sm opacity-70">
+                                {country.region} &middot;{' '}
+                                {country.population.toLocaleString()}
+                            </p>
                         </Link>
-                    </li>
+                    </motion.li>
                 ))}
             </ul>
         </section>
