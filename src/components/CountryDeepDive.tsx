@@ -95,9 +95,9 @@ export default function CountryDeepDive({ country }: { country: Country }) {
             <div className="flex justify-center">
                 <Link
                     href={`/countries/${country.code}`}
-                    className="btn btn-outline mt-6"
+                    className="btn btn-outline mt-6 flex items-center gap-2"
                 >
-                    Back to summary
+                    <span aria-hidden="true">←</span> Back to summary
                 </Link>
             </div>
         </section>
