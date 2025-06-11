@@ -15,9 +15,9 @@ type Country = {
 
 export const dynamic = 'force-dynamic';
 
-export default async function CountryPage({ params }: Promise<{ params: { name: string } }>) {
+export default async function CountryPage({ params }: { params: { name: string } }) {
     try {
-        const { name } = await params;
+        const name = params.name;
 
         const baseUrl =
             process.env.NODE_ENV === 'development'
@@ -29,7 +29,8 @@ export default async function CountryPage({ params }: Promise<{ params: { name: 
         });
 
         if (!res.ok) throw new Error('API fetch failed');
-        const data = await res.json();
+
+        const data: Country[] = await res.json();
         if (!Array.isArray(data)) throw new Error('Invalid API shape');
 
         const country = data.find(
