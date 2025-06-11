@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   title: 'Countries Explorer',
   description: 'Search and explore countries using the REST Countries API',
   manifest: '/site.webmanifest',
+};
+
+export const viewport = {
   themeColor: '#1e3a8a',
 };
 
