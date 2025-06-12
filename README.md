@@ -79,7 +79,7 @@ npm start
 
 ## 📅 Preview
 
-![App screenshot](/public/Screenshot%202025-06-11%20115136.png)
+![App screenshot]("https://www.ryan-w.dev/projects/countries.png")
 
 ## ✨ Inspiration & Purpose
 
