@@ -1,56 +1,44 @@
 // lib/getNewsByCode.ts
-
 type NewsCache = {
-    [code: string]: {
-      articles: any[];
-      timestamp: number;
-    };
+    [code: string]: { articles: any[]; timestamp: number };
   };
   
   const cache: NewsCache = {};
-  const TTL = 1000 * 60 * 30; // 30 minutes
+  const TTL = 1_000 * 60 * 30; // 30 min
   
-  export async function getNewsByCode(code: string, name?: string): Promise<any[]> {
+  export async function getNewsByCode(code: string, name?: string) {
     const now = Date.now();
     const cached = cache[code];
-  
-    if (cached && now - cached.timestamp < TTL) {
-      return cached.articles;
-    }
+    if (cached && now - cached.timestamp < TTL) return cached.articles;
   
     const API_KEY = process.env.GNEWS_API_KEY;
     if (!API_KEY) {
-      console.warn("⚠️ GNEWS_API_KEY is missing. News cannot be fetched.");
+      console.warn("⚠️ GNEWS_API_KEY missing");
       return [];
     }
   
-    const BASE_URL = "https://gnews.io/api/v4/top-headlines";
-    const COUNTRY_URL = `${BASE_URL}?country=${code.toLowerCase()}&lang=en&token=${API_KEY}`;
-    const FALLBACK_URL = `https://gnews.io/api/v4/search?q=${encodeURIComponent(name || code)}&lang=en&token=${API_KEY}`;
+    const countryURL =
+      `https://gnews.io/api/v4/top-headlines?country=${code.toLowerCase()}&lang=en&token=${API_KEY}`;
+    const fallbackURL =
+      `https://gnews.io/api/v4/search?q=${encodeURIComponent(name || code)}&lang=en&token=${API_KEY}`;
   
     try {
-      // 🌐 First attempt: fetch using country code
-      let res = await fetch(COUNTRY_URL);
+      // ── first try the country endpoint ──
+      let res = await fetch(countryURL, { cache: "no-store" });
       let data = await res.json();
   
-      if (!res.ok || !data.articles?.length) {
-        console.warn(`🔁 No results for country=${code}, falling back to search "${name || code}"`);
-        res = await fetch(FALLBACK_URL);
+      // ── fallback to keyword search if no results ──
+      if (!data.articles?.length) {
+        console.warn(`🔁 No results for country=${code}. Fallback to query.`);
+        res = await fetch(fallbackURL, { cache: "no-store" });
         data = await res.json();
       }
   
       const articles = data.articles ?? [];
-  
-      // ✅ Cache result for this code
-      cache[code] = {
-        articles,
-        timestamp: now,
-      };
-  
-      console.log(`✅ News loaded for ${code}: ${articles.length} article(s)`);
+      cache[code] = { articles, timestamp: now };
       return articles;
-    } catch (error) {
-      console.error(`❌ Failed to fetch news for ${code}:`, error);
+    } catch (err) {
+      console.error("❌ GNews fetch failed:", err);
       return [];
     }
   }
