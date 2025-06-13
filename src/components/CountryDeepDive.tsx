@@ -83,10 +83,7 @@ export default function CountryDeepDive({
                 />
                 <InfoCard
                     title="Time & Transport"
-                    items={[
-                        ["Time‑zones", country.timezones?.join(", ") || "—"],
-                        ["Drives on", country.car?.side || "—"],
-                    ]}
+                    items={[["Time‑zones", country.timezones?.join(", ") || "—"], ["Drives on", country.car?.side || "—"]]}
                 />
                 <InfoCard
                     title="Status & Culture"
@@ -115,9 +112,7 @@ export default function CountryDeepDive({
                 <iframe
                     title={`${country.name} map`}
                     className="w-full h-full"
-                    src={`https://maps.google.com/maps?q=${encodeURIComponent(
-                        country.name
-                    )}&t=&z=4&ie=UTF8&iwloc=&output=embed`}
+                    src={`https://maps.google.com/maps?q=${encodeURIComponent(country.name)}&t=&z=4&ie=UTF8&iwloc=&output=embed`}
                     loading="lazy"
                 />
             </motion.div>
@@ -155,10 +150,24 @@ export default function CountryDeepDive({
                         ))}
                     </ul>
                 ) : (
-                    <p className="text-sm text-center opacity-60">
-                        No recent news articles found for this country.
-                    </p>
+                    <p className="text-sm text-center opacity-60">No recent news articles found for this country.</p>
                 )}
+            </motion.div>
+
+            {/* ℹ️ Disclaimer */}
+            <motion.div
+                className="mx-auto max-w-prose text-center text-xs opacity-70 border-t border-[var(--foreground)]/10 pt-6"
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4 }}
+            >
+                <p>
+                    <strong>News feed notice:</strong> This project pulls headlines from the free tier of the
+                    GNews API. For some countries GNews returns world‑wide or regional stories rather than
+                    truly local coverage, so you may see similar articles appear across multiple nations.
+                    This app is just a learning demo, not an authoritative news source.
+                </p>
             </motion.div>
 
             {/* 🔙 Back Button */}
@@ -183,11 +192,9 @@ export default function CountryDeepDive({
 /* 🔧 Helpers                    */
 /* ----------------------------- */
 const yesNo = (v?: boolean) => (v == null ? "—" : v ? "Yes" : "No");
-
 function regionBadge(region: string) {
     return `🌍 ${region}`;
 }
-
 function InfoCard({
     title,
     items,
@@ -206,14 +213,9 @@ function InfoCard({
             <h2 className="font-semibold text-lg mb-4">{title}</h2>
             <ul className="space-y-2">
                 {items.map(([label, value]) => (
-                    <li
-                        key={`${title}-${label}`}
-                        className="flex justify-between text-sm"
-                    >
+                    <li key={`${title}-${label}`} className="flex justify-between text-sm">
                         <span className="opacity-80">{label}</span>
-                        <span className="text-right max-w-[55%] break-words">
-                            {value}
-                        </span>
+                        <span className="text-right max-w-[55%] break-words">{value}</span>
                     </li>
                 ))}
             </ul>
