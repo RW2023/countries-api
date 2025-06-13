@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import PaginationFloating from "./PaginationFloating";
+import BackToTopButton from "./BackToTopButton";
 
 interface Country {
     /** Common name (e.g. “Canada”) */
@@ -133,6 +134,8 @@ export default function CountriesList() {
                 totalPages={totalPages}
                 onChange={(newPage) => setPage(newPage)}
             />
+            <BackToTopButton />
+
 
         </section>
     );
