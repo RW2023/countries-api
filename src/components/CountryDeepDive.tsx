@@ -131,10 +131,9 @@ export default function CountryDeepDive({
                 transition={{ duration: 0.4 }}
             >
                 <h2 className="text-2xl font-semibold text-[var(--foreground)]">Latest News</h2>
-
                 {news.length > 0 ? (
                     <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {news.map((article, idx) => (
+                        {news.slice(0, 6).map((article, idx) => (
                             <li
                                 key={idx}
                                 className="rounded-xl border border-[var(--foreground)]/10 bg-[var(--background)]/60 p-4 shadow-sm hover:shadow-md hover:bg-[var(--foreground)]/10 transition"
