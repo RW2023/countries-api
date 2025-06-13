@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
+import PaginationFloating from "./PaginationFloating";
 
 interface Country {
     /** Common name (e.g. “Canada”) */
@@ -127,20 +128,12 @@ export default function CountriesList() {
             )}
 
             {/* ── pagination ─────────────────────────────────── */}
-            {totalPages > 1 && (
-                <div className="flex justify-center gap-2 mt-6 flex-wrap">
-                    {Array.from({ length: totalPages }).map((_, i) => (
-                        <button
-                            key={i + 1}
-                            onClick={() => setPage(i + 1)}
-                            className={`btn btn-sm ${i + 1 === page ? "btn-primary" : "btn-outline"
-                                }`}
-                        >
-                            {i + 1}
-                        </button>
-                    ))}
-                </div>
-            )}
+            <PaginationFloating
+                page={page}
+                totalPages={totalPages}
+                onChange={(newPage) => setPage(newPage)}
+            />
+
         </section>
     );
 }
