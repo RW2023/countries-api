@@ -103,7 +103,7 @@ export default function CountriesList() {
                 <input
                     type="text"
                     placeholder="Search for a country…"
-                    className="w-full md:flex-1 px-4 py-2 rounded-md border border-[var(--border)] bg-[var(--input-bg)] text-[var(--foreground)] shadow focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                    className="w-full md:flex-1 px-4 py-2 rounded-md border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] shadow focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                 />
@@ -125,7 +125,7 @@ export default function CountriesList() {
 
             {/* ── grid ─────────────────────────────────────── */}
             {loading ? (
-                <ul className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                <ul className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 bg-[var{--background)]">
                     {Array.from({ length: PER_PAGE }).map((_, i) => (
                         <li
                             key={i}
@@ -151,7 +151,7 @@ export default function CountriesList() {
                             <motion.li
                                 key={c.code}
                                 whileHover={{ y: -6 }}
-                                className="rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-md hover:shadow-lg transition"
+                                className="rounded-xl bg-[var(--background)] border border-[var(--border)] shadow-md hover:shadow-lg transition"
                             >
                                 <Link
                                     href={`/countries/${c.code}`}
