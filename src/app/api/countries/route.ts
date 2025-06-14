@@ -4,7 +4,7 @@ import type { Country } from '@/lib/countries';
 
 // ≤ 10 fields to satisfy the API limit
 const FIELDS =
-  'name,cca3,flags,capital,population,region,languages,subregion';
+  'name,cca3,flags,capital,population,region,languages,currencies,subregion';
 
 export async function GET() {
   try {
@@ -32,6 +32,7 @@ export async function GET() {
 
       /* light extras (optional) */
       languages:  c.languages ?? {},
+      currencies: c.currencies ?? {},
       subregion:  c.subregion,
     }));
 
@@ -50,6 +51,7 @@ export async function GET() {
           population: 38_000_000,
           region: 'Americas',
           languages: { eng: 'English', fra: 'French' },
+          currencies: { CAD: { name: 'Canadian dollar', symbol: '$' } },
         },
       ],
       { status: 200 }
