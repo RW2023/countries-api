@@ -111,7 +111,7 @@ export default function CountriesList() {
                 {/* region filter */}
                 <select
                     title="Filter by region"
-                    className="w-full md:w-44 px-3 py-2 rounded-md border border-[var(--border)] bg-[var(--input-bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                    className="w-full md:w-44 px-3 py-2 rounded-md border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
                     value={region}
                     onChange={(e) => setRegion(e.target.value as Region)}
                 >
