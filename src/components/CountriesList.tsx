@@ -103,7 +103,7 @@ export default function CountriesList() {
                 <input
                     type="text"
                     placeholder="Search for a country…"
-                    className="w-full md:flex-1 px-4 py-2 rounded-md border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] shadow focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                    className="w-full md:flex-1 px-4 py-2 rounded-md border border-[var(--border)] bg-[var(--input-bg)] text-[var(--foreground)] shadow focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                 />
@@ -111,7 +111,7 @@ export default function CountriesList() {
                 {/* region filter */}
                 <select
                     title="Filter by region"
-                    className="w-full md:w-44 px-3 py-2 rounded-md border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                    className="w-full md:w-44 px-3 py-2 rounded-md border border-[var(--border)] bg-[var(--input-bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
                     value={region}
                     onChange={(e) => setRegion(e.target.value as Region)}
                 >
@@ -125,15 +125,18 @@ export default function CountriesList() {
 
             {/* ── grid ─────────────────────────────────────── */}
             {loading ? (
-                <ul className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 bg-[var{--background)]">
+                <ul className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
                     {Array.from({ length: PER_PAGE }).map((_, i) => (
                         <li
                             key={i}
-                            className="rounded-xl bg-[var(--surface)] p-4 animate-pulse border border-[var(--border)]"
+                            className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 space-y-4 animate-pulse"
                         >
-                            <div className="w-20 h-14 bg-[var(--border)] opacity-20 rounded mb-4 mx-auto" />
-                            <div className="h-4 bg-[var(--border)] opacity-20 rounded w-3/4 mx-auto mb-2" />
-                            <div className="h-3 bg-[var(--border)] opacity-20 rounded w-1/2 mx-auto" />
+                            {/* flag stub */}
+                            <div className="h-16 w-24 mx-auto rounded bg-[var(--foreground)] opacity-10" />
+                            {/* title stub */}
+                            <div className="h-4 w-3/4 mx-auto rounded bg-[var(--foreground)] opacity-10" />
+                            {/* subtitle stub */}
+                            <div className="h-3 w-1/2 mx-auto rounded bg-[var(--foreground)] opacity-10" />
                         </li>
                     ))}
                 </ul>
@@ -151,7 +154,7 @@ export default function CountriesList() {
                             <motion.li
                                 key={c.code}
                                 whileHover={{ y: -6 }}
-                                className="rounded-xl bg-[var(--background)] border border-[var(--border)] shadow-md hover:shadow-lg transition"
+                                className="rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-md hover:shadow-lg transition"
                             >
                                 <Link
                                     href={`/countries/${c.code}`}
@@ -164,7 +167,9 @@ export default function CountriesList() {
                                         height={68}
                                         className="w-24 h-16 object-cover mx-auto rounded border border-[var(--border)]"
                                     />
-                                    <h2 className="text-sm font-semibold text-[var(--foreground)]">{c.name}</h2>
+                                    <h2 className="text-sm font-semibold text-[var(--foreground)]">
+                                        {c.name}
+                                    </h2>
                                     <p className="text-xs opacity-70 text-[var(--foreground)]">
                                         {c.region} &middot; {c.population.toLocaleString()}
                                     </p>
