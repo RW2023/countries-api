@@ -1,13 +1,18 @@
-import { notFound } from 'next/navigation';
-import CountryDeepDive from '@/components/CountryDeepDive';
-import { getCountryByCode } from '@/lib/countries';
-import { getNewsByCode } from '@/lib/getNewsByCode'; // 🔥 NEW
+// Regenerate this page at most once per day
+export const revalidate = 60 * 60 * 24;          // 24 h
+// ⬆ remove any `export const dynamic = 'force-dynamic'` lines
+
+import { notFound } from "next/navigation";
+import CountryDeepDive from "@/components/CountryDeepDive";
+import { getCountryByCode } from "@/lib/countries";
+import { getNewsByCode } from "@/lib/getNewsByCode";
 
 export default async function DeepPage({ params }: { params: { code: string } }) {
     const country = await getCountryByCode(params.code);
     if (!country) return notFound();
 
-    const news = await getNewsByCode(country.code); // ✅ direct call
+    // country facts can be cached by Next; news bypasses the fetch cache internally
+    const news = await getNewsByCode(country.code, country.name);
 
     return <CountryDeepDive country={country} news={news} />;
 }
