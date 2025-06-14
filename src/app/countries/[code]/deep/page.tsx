@@ -1,5 +1,7 @@
+// app/countries/[code]/deep/page.tsx
 // Regenerate this page at most once per day
-export const revalidate = 60 * 60 * 24;          // 24 h
+export const revalidate = 86_400; // 24 h
+
 // ⬆ remove any `export const dynamic = 'force-dynamic'` lines
 
 import { notFound } from "next/navigation";
@@ -7,7 +9,11 @@ import CountryDeepDive from "@/components/CountryDeepDive";
 import { getCountryByCode } from "@/lib/countries";
 import { getNewsByCode } from "@/lib/getNewsByCode";
 
-export default async function DeepPage({ params }: { params: { code: string } }) {
+export default async function DeepPage({
+    params,
+}: {
+    params: { code: string };
+}) {
     const country = await getCountryByCode(params.code);
     if (!country) return notFound();
 
