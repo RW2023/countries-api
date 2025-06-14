@@ -1,30 +1,58 @@
-// CountriesList.tsx – simple search + pagination + transitions (no sidebar filters)
+// CountriesList.tsx – search + region filter + pagination + transitions (no sidebar filters)
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import PaginationFloating from "./PaginationFloating";
 import BackToTopButton from "./BackToTopButton";
 
+/** The shape returned by /api/countries */
 interface Country {
-    /** Common name (e.g. “Canada”) */
+    /** Common name (e.g. "Canada") */
     name: string;
-    /** 3-letter alpha code used for routing (e.g. “CAN”) */
+    /** ISO‑3166 alpha‑3 code (e.g. "CAN") */
     code: string;
     flag: string;
     capital: string;
     population: number;
-    region: string;
+    region: Region;
     languages?: Record<string, string>;
 }
+
+/**
+ * Add a sentinel "All" so the select can clear the region filter
+ * without breaking type‑safety.
+ */
+type Region =
+    | "Africa"
+    | "Americas"
+    | "Asia"
+    | "Europe"
+    | "Oceania"
+    | "Antarctic"
+    | "Polar"
+    | "All";
+
+const REGIONS: Region[] = [
+    "All",
+    "Africa",
+    "Americas",
+    "Asia",
+    "Europe",
+    "Oceania",
+    "Antarctic",
+    "Polar",
+];
 
 const PER_PAGE = 48;
 
 export default function CountriesList() {
+    /*────────────────────────── state */
     const [countries, setCountries] = useState<Country[]>([]);
     const [search, setSearch] = useState("");
+    const [region, setRegion] = useState<Region>("All");
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [error, setError] = useState(false);
@@ -44,13 +72,25 @@ export default function CountriesList() {
             });
     }, []);
 
-    /*── Derived lists ────────────────────────────────────*/
-    const filtered = countries.filter((c) =>
-        c.name.toLowerCase().includes(search.toLowerCase())
-    );
+    /*── Derived list after search + region filter ────────*/
+    const filtered = useMemo(() => {
+        return countries.filter((c) => {
+            const matchesRegion = region === "All" || c.region === region;
+            const matchesSearch = c.name
+                .toLowerCase()
+                .includes(search.toLowerCase());
+            return matchesRegion && matchesSearch;
+        });
+    }, [countries, search, region]);
+
     const totalPages = Math.ceil(filtered.length / PER_PAGE) || 1;
     const start = (page - 1) * PER_PAGE;
     const pageSlice = filtered.slice(start, start + PER_PAGE);
+
+    /* Reset page whenever the filters change */
+    useEffect(() => {
+        setPage(1);
+    }, [search, region]);
 
     /*── Error fallback ───────────────────────────────────*/
     if (error) {
@@ -63,19 +103,38 @@ export default function CountriesList() {
 
     return (
         <section className="space-y-8 min-h-screen">
-            {/* ── search box ─────────────────────────────────── */}
-            <input
-                type="text"
-                placeholder="Search for a country…"
-                className="w-full max-w-md px-4 py-2 rounded-md border border-[var(--border)] bg-[var(--input-bg)] text-[var(--foreground)] shadow focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
-                value={search}
-                onChange={(e) => {
-                    setSearch(e.target.value);
-                    setPage(1);
-                }}
-            />
+            {/* ── controls (search + region) ───────────────── */}
+            <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+                {/* Search */}
+                <label className="form-control w-full sm:w-1/2">
+                    <span className="label-text mb-1">Search</span>
+                    <input
+                        type="text"
+                        placeholder="Search for a country…"
+                        className="input input-bordered w-full"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+                </label>
 
-            {/* ── grid ───────────────────────────────────────── */}
+                {/* Region */}
+                <label className="form-control w-full sm:w-40">
+                    <span className="label-text mb-1">Region</span>
+                    <select
+                        className="select select-bordered"
+                        value={region}
+                        onChange={(e) => setRegion(e.target.value as Region)}
+                    >
+                        {REGIONS.map((r) => (
+                            <option key={r} value={r}>
+                                {r === "All" ? "All regions" : r}
+                            </option>
+                        ))}
+                    </select>
+                </label>
+            </div>
+
+            {/* ── grid ─────────────────────────────────────── */}
             {loading ? (
                 <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {Array.from({ length: 8 }).map((_, i) => (
@@ -92,7 +151,7 @@ export default function CountriesList() {
             ) : (
                 <AnimatePresence mode="wait">
                     <motion.ul
-                        key={page + search}
+                        key={`${page}-${search}-${region}`}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
@@ -116,10 +175,11 @@ export default function CountriesList() {
                                         height={68}
                                         className="w-24 h-16 object-cover mx-auto rounded border border-[var(--border)]"
                                     />
-                                    <h2 className="text-lg font-semibold">{country.name}</h2>
+                                    <h2 className="text-lg font-semibold">
+                                        {country.name}
+                                    </h2>
                                     <p className="text-sm opacity-70">
-                                        {country.region} &middot;{" "}
-                                        {country.population.toLocaleString()}
+                                        {country.region} &middot; {country.population.toLocaleString()}
                                     </p>
                                 </Link>
                             </motion.li>
@@ -128,15 +188,15 @@ export default function CountriesList() {
                 </AnimatePresence>
             )}
 
-            {/* ── pagination ─────────────────────────────────── */}
+            {/* ── pagination ───────────────────────────────── */}
             <PaginationFloating
                 page={page}
                 totalPages={totalPages}
                 onChange={(newPage) => setPage(newPage)}
             />
+
+            {/* ── back‑to‑top (mobile only) ────────────────── */}
             <BackToTopButton />
-
-
         </section>
     );
 }
