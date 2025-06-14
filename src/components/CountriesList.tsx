@@ -10,10 +10,8 @@ import BackToTopButton from "./BackToTopButton";
 
 /** The shape returned by /api/countries */
 interface Country {
-    /** Common name (e.g. "Canada") */
-    name: string;
-    /** ISO‑3166 alpha‑3 code (e.g. "CAN") */
-    code: string;
+    name: string; // common name, e.g. “Canada”
+    code: string; // alpha‑3 code for routing
     flag: string;
     capital: string;
     population: number;
@@ -21,10 +19,6 @@ interface Country {
     languages?: Record<string, string>;
 }
 
-/**
- * Add a sentinel "All" so the select can clear the region filter
- * without breaking type‑safety.
- */
 type Region =
     | "Africa"
     | "Americas"
@@ -49,7 +43,6 @@ const REGIONS: Region[] = [
 const PER_PAGE = 48;
 
 export default function CountriesList() {
-    /*────────────────────────── state */
     const [countries, setCountries] = useState<Country[]>([]);
     const [search, setSearch] = useState("");
     const [region, setRegion] = useState<Region>("All");
@@ -59,43 +52,44 @@ export default function CountriesList() {
 
     /*── Fetch all countries ──────────────────────────────*/
     useEffect(() => {
-        setLoading(true);
-        fetch("/api/countries")
-            .then((r) => (r.ok ? r.json() : Promise.reject("fetch failed")))
-            .then((data: Country[]) => {
+        (async () => {
+            try {
+                const res = await fetch("/api/countries", { next: { revalidate: 86_400 } });
+                if (!res.ok) throw new Error();
+                const data: Country[] = await res.json();
                 setCountries(data);
-                setLoading(false);
-            })
-            .catch(() => {
+            } catch {
                 setError(true);
+            } finally {
                 setLoading(false);
-            });
+            }
+        })();
     }, []);
 
-    /*── Derived list after search + region filter ────────*/
+    /*── Derived list (search + region) ───────────────────*/
     const filtered = useMemo(() => {
+        const term = search.trim().toLowerCase();
         return countries.filter((c) => {
-            const matchesRegion = region === "All" || c.region === region;
-            const matchesSearch = c.name
-                .toLowerCase()
-                .includes(search.toLowerCase());
-            return matchesRegion && matchesSearch;
+            const regionMatch = region === "All" || c.region === region;
+            const searchMatch =
+                !term ||
+                c.name.toLowerCase().includes(term) ||
+                c.capital.toLowerCase().includes(term);
+            return regionMatch && searchMatch;
         });
     }, [countries, search, region]);
 
-    const totalPages = Math.ceil(filtered.length / PER_PAGE) || 1;
-    const start = (page - 1) * PER_PAGE;
-    const pageSlice = filtered.slice(start, start + PER_PAGE);
-
-    /* Reset page whenever the filters change */
+    /* snap to first page when filter changes */
     useEffect(() => {
         setPage(1);
     }, [search, region]);
 
-    /*── Error fallback ───────────────────────────────────*/
+    const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
+    const slice = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+
     if (error) {
         return (
-            <div className="p-4 text-error text-center font-medium">
+            <div className="p-4 text-error font-medium text-center">
                 Failed to load countries. Please try again later.
             </div>
         );
@@ -103,83 +97,76 @@ export default function CountriesList() {
 
     return (
         <section className="space-y-8 min-h-screen">
-            {/* ── controls (search + region) ───────────────── */}
-            <div className="flex flex-col sm:flex-row sm:items-end gap-4">
-                {/* Search */}
-                <label className="form-control w-full sm:w-1/2">
-                    <span className="label-text mb-1">Search</span>
-                    <input
-                        type="text"
-                        placeholder="Search for a country…"
-                        className="input input-bordered w-full"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                </label>
+            {/* ── controls ─────────────────────────────────── */}
+            <div className="flex flex-col md:flex-row md:items-end gap-4 w-full max-w-4xl">
+                {/* search */}
+                <input
+                    type="text"
+                    placeholder="Search for a country…"
+                    className="w-full md:flex-1 px-4 py-2 rounded-md border border-[var(--border)] bg-[var(--input-bg)] text-[var(--foreground)] shadow focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                />
 
-                {/* Region */}
-                <label className="form-control w-full sm:w-40">
-                    <span className="label-text mb-1">Region</span>
-                    <select
-                        className="select select-bordered"
-                        value={region}
-                        onChange={(e) => setRegion(e.target.value as Region)}
-                    >
-                        {REGIONS.map((r) => (
-                            <option key={r} value={r}>
-                                {r === "All" ? "All regions" : r}
-                            </option>
-                        ))}
-                    </select>
-                </label>
+                {/* region filter */}
+                <select
+                    title="Filter by region"
+                    className="w-full md:w-44 px-3 py-2 rounded-md border border-[var(--border)] bg-[var(--input-bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                    value={region}
+                    onChange={(e) => setRegion(e.target.value as Region)}
+                >
+                    {REGIONS.map((r) => (
+                        <option key={r} value={r}>
+                            {r === "All" ? "All regions" : r}
+                        </option>
+                    ))}
+                </select>
             </div>
 
             {/* ── grid ─────────────────────────────────────── */}
             {loading ? (
-                <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {Array.from({ length: 8 }).map((_, i) => (
+                <ul className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                    {Array.from({ length: PER_PAGE }).map((_, i) => (
                         <li
                             key={i}
-                            className="rounded-xl bg-gray-100 dark:bg-gray-800 p-4 animate-pulse"
+                            className="rounded-xl bg-[var(--surface)] p-4 animate-pulse border border-[var(--border)]"
                         >
-                            <div className="w-20 h-14 bg-gray-300 dark:bg-gray-700 rounded mb-4 mx-auto" />
-                            <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mx-auto mb-2" />
-                            <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-1/2 mx-auto" />
+                            <div className="w-20 h-14 bg-[var(--border)] opacity-20 rounded mb-4 mx-auto" />
+                            <div className="h-4 bg-[var(--border)] opacity-20 rounded w-3/4 mx-auto mb-2" />
+                            <div className="h-3 bg-[var(--border)] opacity-20 rounded w-1/2 mx-auto" />
                         </li>
                     ))}
                 </ul>
             ) : (
                 <AnimatePresence mode="wait">
                     <motion.ul
-                        key={`${page}-${search}-${region}`}
+                        key={`${search}-${region}-${page}`}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.3 }}
-                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+                        className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6"
                     >
-                        {pageSlice.map((country) => (
+                        {slice.map((c) => (
                             <motion.li
-                                key={country.code}
+                                key={c.code}
                                 whileHover={{ y: -6 }}
-                                className="rounded-xl bg-gray-100 dark:bg-gray-800 border border-[var(--border)] shadow-md"
+                                className="rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-md hover:shadow-lg transition"
                             >
                                 <Link
-                                    href={`/countries/${country.code}`}
+                                    href={`/countries/${c.code}`}
                                     className="block p-5 space-y-4 text-center"
                                 >
                                     <Image
-                                        src={country.flag}
-                                        alt={country.name}
+                                        src={c.flag}
+                                        alt={`${c.name} flag`}
                                         width={100}
                                         height={68}
                                         className="w-24 h-16 object-cover mx-auto rounded border border-[var(--border)]"
                                     />
-                                    <h2 className="text-lg font-semibold">
-                                        {country.name}
-                                    </h2>
-                                    <p className="text-sm opacity-70">
-                                        {country.region} &middot; {country.population.toLocaleString()}
+                                    <h2 className="text-sm font-semibold text-[var(--foreground)]">{c.name}</h2>
+                                    <p className="text-xs opacity-70 text-[var(--foreground)]">
+                                        {c.region} &middot; {c.population.toLocaleString()}
                                     </p>
                                 </Link>
                             </motion.li>
@@ -189,13 +176,7 @@ export default function CountriesList() {
             )}
 
             {/* ── pagination ───────────────────────────────── */}
-            <PaginationFloating
-                page={page}
-                totalPages={totalPages}
-                onChange={(newPage) => setPage(newPage)}
-            />
-
-            {/* ── back‑to‑top (mobile only) ────────────────── */}
+            <PaginationFloating page={page} totalPages={totalPages} onChange={setPage} />
             <BackToTopButton />
         </section>
     );
